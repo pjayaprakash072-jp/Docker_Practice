@@ -1,0 +1,228 @@
+Docker
+=========
+    - Docker is a platform used to build, run, and manage applications inside light weight, portable containers.
+    - for all cli commands hit :- https://docs.docker.com/reference/cli/docker/
+    - to ecplore all images in docker hit:-https://hub.docker.com/repositories/jayaprakash951
+========================================================================================================================
+1. Docker Installation
+========================================================================================================================
+    -install wsl
+        - wsl --install
+    -version
+        - docker --version 
+		or
+	- docker -vv
+    - docker login ( it will login to docker hub).
+========================================================================================================================
+2. Docker Images
+========================================================================================================================
+    1. to check all images in docker.
+        - docker images
+		Or
+	- docker image ls
+    2. pulling images in docker
+        ->go to an images and follow the process.
+            -> ex : docker pull hello-world
+    -To work with docker images we need to create the docker container and then run. 
+    3. Tag an existing image
+    - if you already have and image and u want to create updated version of it.
+        - docker tag nginx:alpine new_name
+            -new_name : acc, aja:v3, .adge....
+            - nginx:alpine (existing one)
+            - nginx:v2 ( new created one)
+    4. check all versions of image
+	    - docker history image_name
+		-> this will give all the images - upto latest
+		-> suppose 1 company published image for first time and the company updated image for latest, the updated is act as a new layer.
+    5. To know more about image
+	-docker inspect image img_name
+
+    4.REMOVE IMAGE 
+        -docker rmi image_name
+========================================================================================================================
+3. Docker containers 
+========================================================================================================================
+    1. creating container  
+        -> docker create --name mycuatomName image_name:tag_name
+            -tag_name(optional) this tell the particular version of it 
+            -EX : docker create --name mycontainer hello-world
+    2. running a container
+        -> docker start -a container_name
+            -start means start the existing container
+            -a means attatches yout terminal so you can see the output
+            -ex: docker start -a mycontainer
+    3. Create and run container 
+        -docker run --name mycontainer2 hello-world
+        -docker run -d --name mycontaner1 -p 8080:80 nginx:alpine
+            -d - run the contaner in background
+            -p 8080:80 - map the laptop's port 8080 to the container's port 80
+            -alpine - the is the version of nginx
+    4. Entering into container
+	-docker exec -it container_name path
+	-Ex : docker exec -it nginx /bin/sh
+	    Working with container through terminal
+		=============================
+		- only limited commands will work because it is light weight.
+	    1. getting all files and folders - ls
+	    2. createign file - 		touch file.extension
+	    3. removing file  - 		rm file_name.extension
+    4. stop container 
+        - docker stop container_name
+		Or(when we want to stop forcefully, like when container unresponsive)
+	- docker kill container_name
+    5. REMOVE contaner
+        -docker rm container_name
+========================================================================================================================
+4. Docker Networking(three virtual networks)
+========================================================================================================================
+	-Inspecting network like to check how many containers are connected to this network
+	-docker inspect bridge
+		-containers can communicate with their ip address(each container have its own ip address)
+    1. Bridge network( default one while creating the containers).
+    2. host(not very imp);
+    3. none(not very imp);
+========================================================================================================================
+5. Custom Images
+========================================================================================================================
+    -> Creating custom inage means taking and existign image and adding your own files,software or application ot it.
+    -> when creatign custom Docker image, we write instructions inside a file called "Dockerfile". 
+        -> each instructions has its own purpose.
+    Building image from file.
+        -> docker build -t img_name .
+            -docker build : Builds a docker image using Dockerfile.
+            - -t img_naem ; giving the (tag)name to image where we use --name for containers.
+            - . : Uses the current directory as the build context( where docker looks for  the Docker file and application  files)
+    Instructions/Attrubutes in Dockerfile
+        1. FROM image_name 
+            ->Selects the base Image.
+            ex:
+                -> FROM node:22-alpine
+                -> this provides node.js and its runtime environment. you don't need to install Node.js seperately inside the image.
+        2.WORKDIR /directory_path
+            -> Sets the working directory(choosing application folder)
+            ex:
+                ->WORKDIR /app
+                -> your backend files and dependencies will be placed under /app  inside the container.
+        3.COPY <source> <destination>
+            -> copy files from the host(computer) into image only normal files and folder.
+            ->DOES NOT support(it will directly copy as it is without extract/download) downloadable, archive files, zip, tar as source.
+            ex: COPY package*.json ./
+                    Or
+                COPY package*.json /app
+                - ./ is the destination, meaning the current working directory inside image , which is "/app" because of WORKDIR /app.
+            ex: COPY file.txt file1.txt ./ : cpoing more files.
+            ex: COPY . . : first . means the current directory of build context on your computer, second . means the work directory inside the image, ie is /app.
+        4.Run command
+            - Executes a command while building the image.
+            ex:RUN npm ci --omit=dev : install dependencies  listed in lock file, like express, mongoose....
+                - RUN : Executes the command while building the Docker image.
+                - npm ci : cleanly install,it removes existing version, AND it installs exact version mentioned in package-lock.json
+                --omit:dev : skips development dependencies.
+        5.ENV key=value
+            - Sets an environment variable.
+            ex: ENV PORT=5000
+                Or
+            ex: ENV PORT=500 \
+                    env2=valu3
+                -Makes PORT available to your Node.js application. your server application can access like "process.env.PORT"
+            -docker run --env-file .env -p 5000:5000 img_name.
+            ex: docker run --env-file .env -p 5000:5000 food_stack
+                - this used at container run time, and env variables mentioned in imager are overrided.
+        6. EXPOSE port_number
+            -Documents(only) the port the application uses in container.
+            ex: EXPOSE 5000 
+        7. USER username 
+            -sets the user for subsequent instructions and the running application.
+            ex: USER node 
+                -run your application as "node" user instead of "root" user.
+        8. LABEL key="value"
+            -adds metadata to the image, it does not change how the backen works.
+            ex: LABEL version="1.0" description="foodStack backend"
+        9. CMD ["exetutable","argument"]
+            -specifies the default command when the container starts.
+            ex: CMD ["node", "server.js"]
+            -When container starts, Docker runs "node server.js" by default.
+        10. ARG VARABLE_NAME=defalt value
+            -a value used during image build.
+            ex:ARG APP_VERSION=1.0
+                LABEL app_version=$APP_VERSION
+            -suppose you want new image with different version 
+            -build new image with new version
+                ex: docker build --build-arg APP_VERSION=2.0 -t foodStack .
+        11. ADD <source> <destination>
+            -same like COPY here it will support downloadable, archive, tar, zip files as well.
+            ex: ADD https://exampel.com/file.txt /app/
+                - downloads file from url into folder.
+========================================================================================================================
+6. Docker volumes
+========================================================================================================================
+    1. create volumes
+        -docker volume create volume_name
+    2. see all volumes
+        -docker volume ls
+    3. inspect volume 
+        -docker inspect volume volume_name
+    4. mounting volume to container
+        1. create volume first and then mount(use) the volume while creating the container.
+            - docker run -it --name container_name -v volume_name:destination_container_one image_name 
+                                    OR 
+            -docker run -it --name=container_name --mount source=volume_name,destination=destination_container_one image_name
+                ex: docker run -it --name cent -v test_volume:/data centos bash
+                    -interactive terminal
+                    - --name cent - naming the container
+                    - v test_volume:/data - mount the named volume at /data
+                    - centow - image 
+                    - bash - Opens a small shell.
+            - sharing volume from anotehr container
+                -docker run -it --volumes.from existing_container_name --name new_container_naem image_name
+                
+========================================================================================================================
+7. Inspecting image.
+========================================================================================================================
+    -Docker desktop does not provides a full file browser for an image directly. use temporary container to explore its files.
+    1. image details 
+        - docker image inspect image_name : shows image configuration and metadata.
+    2. image build history
+        - docker history img_name : shows image layers and build instructions
+    3. view files inside the image( creating temporary container).
+        - docker  run --rm -it --entrypoint sh img_name : Opens shell inside image.
+            Explanation:
+            -docker run : creates and starts container from image.
+            -rm : automatically remove container when u exit.
+            -it: i(interactive)-keeps the keyboard input open so you can type commands, t(tty-teletypewriter)- Provides a terminal to interact with contaner.
+            --entrypoint sh - starts the sh(shell) command instead image's default command,that understands and executes shell commands.
+    4. list files
+        -ls -la : list all files in the root directory.
+        -ls -la /app : list all files in the application directory.
+    5. reading file
+        -cat /app/package.json
+    6. writing data to the file 
+        - echo "hello world" >> file_name.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> docker is mainly useful in Microservices, Testing, DevOps..
+
+1. Docker custom image
+2. Docker conatiners
+3. Docker commands
+4. Port mapping 
+5. Docker repository
+6. Docker use cases
