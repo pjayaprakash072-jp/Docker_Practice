@@ -59,13 +59,17 @@ Docker
             -alpine - the is the version of nginx
     4. Entering into container
 	-docker exec -it container_name path
-	-Ex : docker exec -it nginx /bin/sh
+	-Ex :
+        nginx :- docker exec -it nginx /bin/sh
+        mongo :- docker exec -t mongodb mongosh
 	    Working with container through terminal
 		=============================
 		- only limited commands will work because it is light weight.
 	    1. getting all files and folders - ls
 	    2. createign file - 		touch file.extension
 	    3. removing file  - 		rm file_name.extension
+    4. check the mounts in a contaner
+        -docker inspect contaner_name --format '{{json .Mounts}}'
     4. stop container 
         - docker stop container_name
 		Or(when we want to stop forcefully, like when container unresponsive)
@@ -163,6 +167,9 @@ Docker
     3. inspect volume 
         -docker inspect volume volume_name
     4. mounting volume to container
+        -docker DOES'T support to mount volume to existing container -- 
+            -> can mount at the time of creating container or 
+            -> sharing volume from another container.
         1. create volume first and then mount(use) the volume while creating the container.
             - docker run -it --name container_name -v volume_name:destination_container_one image_name 
                                     OR 
@@ -174,7 +181,13 @@ Docker
                     - centow - image 
                     - bash - Opens a small shell.
             - sharing volume from anotehr container
-                -docker run -it --volumes.from existing_container_name --name new_container_naem image_name
+                -docker run -it --volumes.from existing_container_name --name new_container_name image_name
+    5. see all unused volumes 
+        -docker volume ls --filter dangling=true
+    6. delete a specified voluem 
+        -docker volume rm volume_name
+    7. delete all unused volumes 
+        -docker volume prune
                 
 ========================================================================================================================
 7. Inspecting image.

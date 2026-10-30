@@ -1,0 +1,320 @@
+MONGODB SHELL COMMANDS CHEAT SHEET
+========================================
+
+1. DATABASE COMMANDS
+========================================
+
+# Show all databases
+show dbs
+
+# Select or switch to a database
+use foodstack
+
+# Show the currently selected database
+db
+
+# Get detailed information about databases
+db.adminCommand({ listDatabases: 1 })
+
+# Create a database
+# MongoDB creates it when you store data
+use foodstack
+db.students.insertOne({ name: "Jay", age: 20 })
+
+# Delete the current database and all its collections
+db.dropDatabase()
+
+
+2. COLLECTION COMMANDS
+========================================
+
+# Show all collections in the current database
+show collections
+
+# Get collection names as an array
+db.getCollectionNames()
+
+# Create a collection
+db.createCollection("students")
+
+# Get details about a collection
+db.students.stats()
+
+# Rename a collection
+db.students.renameCollection("learners")
+
+# Delete a collection and its indexes
+db.students.drop()
+
+
+3. INSERT COMMANDS
+========================================
+
+# Insert one document
+db.students.insertOne({
+    name: "Jay",
+    age: 20
+})
+
+# Insert multiple documents
+db.students.insertMany([
+    { name: "Ram", age: 21 },
+    { name: "Sam", age: 22 }
+])
+
+
+4. READ / FIND COMMANDS
+========================================
+
+# Find all documents
+db.students.find()
+
+# Display documents in readable format
+db.students.find().pretty()
+
+# Find one document
+db.students.findOne()
+
+# Find documents matching a condition
+db.students.find({ age: 20 })
+
+# Find documents where age is greater than 20
+db.students.find({ age: { $gt: 20 } })
+
+# Find documents where age is less than 20
+db.students.find({ age: { $lt: 20 } })
+
+# Find documents where age is greater than or equal to 20
+db.students.find({ age: { $gte: 20 } })
+
+# Find documents where age is not equal to 20
+db.students.find({ age: { $ne: 20 } })
+
+# Find documents matching multiple conditions
+db.students.find({ age: 20, name: "Jay" })
+
+# Find documents matching either condition
+db.students.find({
+    $or: [{ age: 20 }, { name: "Ram" }]
+})
+
+# Return selected fields only
+db.students.find({}, { name: 1, age: 1, _id: 0 })
+
+# Limit the number of results
+db.students.find().limit(5)
+
+# Skip documents
+db.students.find().skip(5)
+
+# Sort by age ascending
+db.students.find().sort({ age: 1 })
+
+# Sort by age descending
+db.students.find().sort({ age: -1 })
+
+# Count matching documents
+db.students.countDocuments({})
+
+# Count documents where age is 20
+db.students.countDocuments({ age: 20 })
+
+
+5. UPDATE COMMANDS
+========================================
+
+# Update one document
+db.students.updateOne(
+    { name: "Jay" },
+    { $set: { age: 21 } }
+)
+
+# Update multiple documents
+db.students.updateMany(
+    { age: 20 },
+    { $set: { status: "active" } }
+)
+
+# Increment a numeric field
+db.students.updateOne(
+    { name: "Jay" },
+    { $inc: { age: 1 } }
+)
+
+# Add a field to a document
+db.students.updateOne(
+    { name: "Jay" },
+    { $set: { city: "Vijayawada" } }
+)
+
+# Remove a field from a document
+db.students.updateOne(
+    { name: "Jay" },
+    { $unset: { city: "" } }
+)
+
+# Replace an entire document, except its _id
+db.students.replaceOne(
+    { name: "Jay" },
+    { name: "Jay", age: 22 }
+)
+
+# Update or insert if no matching document exists
+db.students.updateOne(
+    { name: "NewStudent" },
+    { $set: { age: 20 } },
+    { upsert: true }
+)
+
+
+6. DELETE COMMANDS
+========================================
+
+# Delete one matching document
+db.students.deleteOne({ name: "Jay" })
+
+# Delete all documents matching a condition
+db.students.deleteMany({ age: 20 })
+
+# Delete every document in a collection
+db.students.deleteMany({})
+
+# Delete every document from every collection,
+# keeping the collections and their indexes
+db.getCollectionNames().forEach(name => {
+    db.getCollection(name).deleteMany({})
+})
+
+# Drop one collection
+db.students.drop()
+
+# Drop every collection in the current database
+db.getCollectionNames().forEach(name => {
+    db.getCollection(name).drop()
+})
+
+# Delete the current database entirely
+db.dropDatabase()
+
+
+7. INDEX COMMANDS
+========================================
+
+# Show indexes
+db.students.getIndexes()
+
+# Create an index
+db.students.createIndex({ name: 1 })
+
+# Create a unique index
+db.students.createIndex({ email: 1 }, { unique: true })
+
+# Remove an index by name
+db.students.dropIndex("name_1")
+
+# Remove all indexes except the default _id index
+db.students.dropIndexes()
+
+
+8. AGGREGATION COMMANDS
+========================================
+
+# Group documents by age
+db.students.aggregate([
+    { $group: { _id: "$age", total: { $sum: 1 } } }
+])
+
+# Match documents and sort them
+db.students.aggregate([
+    { $match: { age: { $gte: 20 } } },
+    { $sort: { age: 1 } }
+])
+
+# Count documents
+db.students.aggregate([
+    { $count: "totalStudents" }
+])
+
+
+9. DATABASE AND COLLECTION INFORMATION
+========================================
+
+# Show current database
+db
+
+# Show collection names
+show collections
+
+# Get collection statistics
+db.students.stats()
+
+# Get the total number of documents
+db.students.countDocuments({})
+
+# List collection names
+db.getCollectionNames()
+
+# Check the current database's collection information
+db.getCollectionInfos()
+
+
+10. EXIT AND HELP
+========================================
+
+# Exit MongoDB Shell
+exit
+
+# General MongoDB Shell help
+help
+
+# Database help
+db.help()
+
+# Collection help
+db.students.help()
+
+
+11. CONNECT TO MONGODB IN DOCKER
+========================================
+
+# Enter MongoDB Shell from Windows PowerShell
+docker exec -it mongodb mongosh
+
+# Select FoodStack database
+use foodstack
+
+# List databases
+show dbs
+
+# List collections
+show collections
+
+# View all documents in a collection
+db.students.find()
+
+# Exit MongoDB Shell
+exit
+
+
+IMPORTANT DIFFERENCES
+========================================
+
+deleteMany({})
+    Deletes documents but keeps the collection and indexes.
+
+db.collection.drop()
+    Deletes the collection and its indexes.
+
+db.dropDatabase()
+    Deletes the entire current database.
+
+show dbs
+    Lists databases containing data that MongoDB reports.
+
+use foodstack
+    Switches to foodstack; it does not immediately create it.
+
+Remember:
+Replace "students" with your actual collection name.
+Be careful with deleteMany({}), drop(), and dropDatabase():
+they can permanently delete data.

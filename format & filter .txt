@@ -1,0 +1,242 @@
+# DOCKER FORMAT AND FILTER NOTES
+
+==================================================
+1. CONTAINERS - FORMAT
+==================================================
+
+# Show all containers with selected properties
+docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+
+# Show only container names and status
+docker ps -a --format "table {{.Names}}\t{{.Status}}"
+
+# Show container IDs and names
+docker ps -a --format "{{.ID}} {{.Names}}"
+
+# Show container names, images, and ports
+docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}"
+
+# Show container names, networks, and mounts
+docker ps -a --format "table {{.Names}}\t{{.Networks}}\t{{.Mounts}}"
+
+# Show JSON-formatted container listing
+docker ps -a --format "json"
+
+
+CONTAINER FORMAT PROPERTIES:
+
+.ID          = Container ID
+.Image       = Image used by container
+.Command     = Command running inside container
+.CreatedAt   = Container creation date and time
+.RunningFor  = Time since container was created
+.Ports       = Published and exposed ports
+.Names       = Container name
+.Status      = Container status and uptime
+.State       = State such as running or exited
+.Size        = Container writable-layer size, when available
+.Labels      = Container labels
+.Mounts      = Mounted volumes and bind mounts
+.Networks    = Connected networks
+
+
+==================================================
+2. CONTAINERS - FILTER
+==================================================
+
+# Show only running containers
+docker ps --filter "status=running"
+
+# Show only stopped containers
+docker ps -a --filter "status=exited"
+
+# Find containers whose names match mongo
+docker ps -a --filter "name=mongo"
+
+# Find containers created from mongo:8
+docker ps -a --filter "ancestor=mongo:8"
+
+# Find containers using port 27018
+docker ps -a --filter "publish=27018"
+
+# Find containers using a particular volume
+docker ps -a --filter "volume=mongo_data"
+
+# Find containers connected to the bridge network
+docker ps -a --filter "network=bridge"
+
+# Find containers with exit code 0
+docker ps -a --filter "exited=0"
+
+# Find containers with a particular label
+docker ps -a --filter "label=app=foodstack"
+
+
+CONTAINER FILTER KEYS:
+
+id         = Match container ID
+name       = Match container name
+ancestor   = Match source image
+status     = Match container state
+exited     = Match exit code
+label      = Match container labels
+before     = Containers created before another container
+since      = Containers created after another container
+publish    = Match published ports
+expose     = Match exposed ports
+network    = Match connected network
+volume     = Match mounted volume
+health     = Match health status, when available
+
+
+==================================================
+3. CONTAINERS - FORMAT + FILTER TOGETHER
+==================================================
+
+# Show names and images of running containers
+docker ps --filter "status=running" --format "table {{.Names}}\t{{.Image}}"
+
+# Show names and statuses of stopped containers
+docker ps -a --filter "status=exited" --format "table {{.Names}}\t{{.Status}}"
+
+# Find Mongo containers and show their names and status
+docker ps -a --filter "name=mongo" --format "table {{.Names}}\t{{.Status}}"
+
+
+==================================================
+4. IMAGES - FORMAT
+==================================================
+
+# Show image repositories, tags, IDs, and sizes
+docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}"
+
+# Show image repository and tag
+docker images --format "table {{.Repository}}\t{{.Tag}}"
+
+# Show image name, ID, and size
+docker images --format "table {{.Repository}}\t{{.ID}}\t{{.Size}}"
+
+# Show image creation time
+docker images --format "table {{.Repository}}\t{{.CreatedSince}}\t{{.CreatedAt}}"
+
+# Show image names with tags
+docker images --format "{{.Repository}}:{{.Tag}}"
+
+# Show JSON-formatted image listing
+docker images --format "json"
+
+
+IMAGE FORMAT PROPERTIES:
+
+.ID           = Image ID
+.Repository   = Image repository/name
+.Tag          = Image tag/version
+.Digest       = Image digest, when available
+.CreatedAt    = Image creation date and time
+.CreatedSince = Time since image was created
+.Size         = Image size
+.SharedSize   = Size of layers shared with other images
+.VirtualSize  = Virtual size, where supported
+.Labels       = Image labels
+
+
+==================================================
+5. IMAGES - FILTER
+==================================================
+
+# Find images matching the mongo repository
+docker images --filter "reference=mongo:*"
+
+# Find dangling images
+docker images --filter "dangling=true"
+
+# Find non-dangling images
+docker images --filter "dangling=false"
+
+# Find images created before a specified image
+docker images --filter "before=mongo:8"
+
+# Find images created after a specified image
+docker images --filter "since=mongo:8"
+
+# Find images with a particular label
+docker images --filter "label=app=foodstack"
+
+# Find images created before the 24-hour cutoff
+docker images --filter "until=24h"
+
+
+IMAGE FILTER KEYS:
+
+reference = Match image repository/tag pattern
+dangling  = Match dangling or non-dangling images
+before    = Images created before a specified image
+since     = Images created after a specified image
+label     = Match image labels
+until     = Match images created before a time cutoff
+
+
+==================================================
+6. IMAGES - FORMAT + FILTER TOGETHER
+==================================================
+
+# Find Mongo images and show their tags and sizes
+docker images --filter "reference=mongo:*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+# Find dangling images and show their IDs and sizes
+docker images --filter "dangling=true" --format "table {{.ID}}\t{{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+# Find a particular FoodStack image and show its ID
+docker images --filter "reference=foodstack:v1" --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}"
+
+# Find older images and show their creation time
+docker images --filter "until=24h" --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedSince}}"
+
+
+==================================================
+7. INSPECT - DETAILED INFORMATION
+==================================================
+
+# Inspect a container
+docker inspect mongodb1
+
+# Show only container state
+docker inspect mongodb1 --format '{{.State.Status}}'
+
+# Show container name and image
+docker inspect mongodb1 --format '{{.Name}} {{.Config.Image}}'
+
+# Show container mounts
+docker inspect mongodb1 --format '{{json .Mounts}}'
+
+# Inspect an image
+docker image inspect mongo:8
+
+# Show image ID
+docker image inspect mongo:8 --format '{{.Id}}'
+
+# Show image operating system and architecture
+docker image inspect mongo:8 --format '{{.Os}} {{.Architecture}}'
+
+
+==================================================
+8. IMPORTANT DIFFERENCE
+==================================================
+
+--format = Controls WHAT information is displayed.
+--filter = Controls WHICH containers or images are displayed.
+inspect  = Shows detailed configuration information.
+
+Container properties:
+.Names, .Status, .State, .Ports, .Networks, .Mounts
+
+Image properties:
+.Repository, .Tag, .ID, .Size, .CreatedSince
+
+NOTE:
+Container listing filters and image listing filters are different.
+Check supported options with:
+
+docker ps --help
+docker images --help
+docker inspect --help
