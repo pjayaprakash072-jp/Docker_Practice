@@ -3,6 +3,7 @@ Docker
     - Docker is a platform used to build, run, and manage applications inside light weight, portable containers.
     - for all cli commands hit :- https://docs.docker.com/reference/cli/docker/
     - to ecplore all images in docker hit:-https://hub.docker.com/repositories/jayaprakash951
+    IMP - FILTERING, FORMATTING IMAGES || CONTAINERS IS THERE IN THE ANOTHER DOC CALLED format & filter .txt
 ========================================================================================================================
 1. Docker Installation
 ========================================================================================================================
@@ -61,7 +62,8 @@ Docker
 	-docker exec -it container_name path
 	-Ex :
         nginx :- docker exec -it nginx /bin/sh
-        mongo :- docker exec -t mongodb mongosh
+        mongo :- docker exec -it mongodb sh 
+        mongo-terminal:- docker exec -it mongodb mongosh
 	    Working with container through terminal
 		=============================
 		- only limited commands will work because it is light weight.
